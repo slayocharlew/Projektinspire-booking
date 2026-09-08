@@ -1,0 +1,14 @@
+{
+  "name": "projektinspire-booking",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Recovered public booking designs for the planned cPanel rebuild.",
+  "type": "module",
+  "scripts": {
+    "start": "node preview.mjs",
+    "dev": "node preview.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

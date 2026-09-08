@@ -1,0 +1,345 @@
+[
+  {
+    "url": "https://booking.projektinspire.co.tz/",
+    "file": "index.html",
+    "bytes": 10831,
+    "sha256": "b318dc96f84dbdd66699d22f4a618a70bf7f60084031a459465eb776a0fe7a78",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/fc7bd28a86647f41.js",
+    "file": "_next/static/chunks/fc7bd28a86647f41.js",
+    "bytes": 3101,
+    "sha256": "09768929ae1c670e5e16da25afe0ffd5438684e80a5ba5e64f0dde80213363f7",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/6e4ad8ffbb0783e8.css",
+    "file": "_next/static/chunks/6e4ad8ffbb0783e8.css",
+    "bytes": 26317,
+    "sha256": "b111582dbb79b59d59c9c8ccb6c45daf03513d6fa5ac76186356629aa82c4a5e",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/ce62453a442c7f35-s.p.124b2306.woff2",
+    "file": "_next/static/media/ce62453a442c7f35-s.p.124b2306.woff2",
+    "bytes": 37520,
+    "sha256": "0a44e0bb6ba5c8537e8814c148ef7755f1bce12112361231f595ecc584a18d7a",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/43d553ff4f297315.css",
+    "file": "_next/static/chunks/43d553ff4f297315.css",
+    "bytes": 153084,
+    "sha256": "7fd8c2fbf6f6619de3653bc155038c24b2f08b89f65fa6ada3498356fcbdec8d",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/340820ca5a1417a0.js",
+    "file": "_next/static/chunks/340820ca5a1417a0.js",
+    "bytes": 21124,
+    "sha256": "74e7ddbc780d1a41db1c6ef099b76eff62d3e3f287c9d6967969cacd25c683bd",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/92e0473f5be0bb7a.js",
+    "file": "_next/static/chunks/92e0473f5be0bb7a.js",
+    "bytes": 215035,
+    "sha256": "c574176faf07955045358d4edbc6cb2524764696dbabca3d87f2cfa2ffc87ac6",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/faed265eea31c625.js",
+    "file": "_next/static/chunks/faed265eea31c625.js",
+    "bytes": 39346,
+    "sha256": "116abf8542d8c90e60591741d06414ccabb8f35686c312efe1d3ee0bc36bccd9",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/65b9015f71d3b53c.js",
+    "file": "_next/static/chunks/65b9015f71d3b53c.js",
+    "bytes": 40952,
+    "sha256": "8ba9037f25eddc1e7f9bb057fbe8a4ac8ef33b7789162ad8a5122778b6a252a0",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/3337476739009024.js",
+    "file": "_next/static/chunks/3337476739009024.js",
+    "bytes": 281,
+    "sha256": "39f55d14657527fbacb855f9abc9ebb3cd2e031493d31c7098611148a9661718",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/turbopack-8e2d3441abab20bc.js",
+    "file": "_next/static/chunks/turbopack-8e2d3441abab20bc.js",
+    "bytes": 9981,
+    "sha256": "cfcb1b7eabf799cb761fd23be20ca3ca1cc306cab9996785780c44100be1654a",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/a308f84f7f78c262.js",
+    "file": "_next/static/chunks/a308f84f7f78c262.js",
+    "bytes": 44861,
+    "sha256": "0d0606c945c348b78d1a05c47a91f65135e4b2025d124dd856a4139c8a3280a7",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/a669855515c542c0.js",
+    "file": "_next/static/chunks/a669855515c542c0.js",
+    "bytes": 85404,
+    "sha256": "f98d417cf858a67826c23d6a8c4e4b40e666680d08bc5742c93eeaf173faf626",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/favicon-project-inspire.svg?v=2",
+    "file": "favicon-project-inspire.svg",
+    "bytes": 943,
+    "sha256": "5f15aa8ceae902227063c98d1e63524ae866e42f6a89bb9c3aaa20ee7f343c48",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/796e7f5bb07ad38d.js",
+    "file": "_next/static/chunks/796e7f5bb07ad38d.js",
+    "bytes": 27854,
+    "sha256": "9d58ef6b6faafd3b80f1117986e0a048ff3c32a53e25f63192e96f32c3443cc8",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/bc9093c620719d3b.js",
+    "file": "_next/static/chunks/bc9093c620719d3b.js",
+    "bytes": 289,
+    "sha256": "6b697a2fa3b350c410bd836c2249816d6bfb4367efa8b968cd5dc5f392b5038a",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/a6dad97d9634a72d.js",
+    "file": "_next/static/chunks/a6dad97d9634a72d.js",
+    "bytes": 112594,
+    "sha256": "0973c1d64c88adc8e3c950410cb58b288f72118d5965b78049438deb8f2f9683",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/62d4b50592542c9f-s.9e30d041.woff2",
+    "file": "_next/static/media/62d4b50592542c9f-s.9e30d041.woff2",
+    "bytes": 19624,
+    "sha256": "32886c5ec61a0d06e5677a98c5ed78a5f1c788c18c5e8d7dcd931c4b6dc19830",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/572c13468b8cff87-s.974b4bc2.woff2",
+    "file": "_next/static/media/572c13468b8cff87-s.974b4bc2.woff2",
+    "bytes": 31472,
+    "sha256": "e44224eb71a96cb33bd046ded16a4e22bb441b170bdfbcba0268a754141b97c8",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/38772d1e0cde909c-s.62d745bb.woff2",
+    "file": "_next/static/media/38772d1e0cde909c-s.62d745bb.woff2",
+    "bytes": 1632,
+    "sha256": "5fdfeaf926cac990770dfa66011bdb87d6b69f43c42aa759dcdcf0a7a197c19a",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/ccee61546c0358b7-s.83a2e280.woff2",
+    "file": "_next/static/media/ccee61546c0358b7-s.83a2e280.woff2",
+    "bytes": 16692,
+    "sha256": "fab8a0056d92fdd8d64fed4b049744144e1d24d08762c513bff78265299ed7a3",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/a0ffaa6a9384d9d3-s.a34f6310.woff2",
+    "file": "_next/static/media/a0ffaa6a9384d9d3-s.a34f6310.woff2",
+    "bytes": 13984,
+    "sha256": "4813e3dfbbb23708c817ef7fd3fd9c82cd0d33c778def0897f0447f1c364ce64",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/fad568eea626db0e-s.479744c5.woff2",
+    "file": "_next/static/media/fad568eea626db0e-s.479744c5.woff2",
+    "bytes": 36292,
+    "sha256": "297193369eea600161f4b5219bd7b08850180fcfe0752f1a2eaa436575cd03b7",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/f7d6090e8b3debad-s.eccd0379.woff2",
+    "file": "_next/static/media/f7d6090e8b3debad-s.eccd0379.woff2",
+    "bytes": 24444,
+    "sha256": "cdd53dc5576a79f35cf280dfbd9c1cb2a5dd2f0ede30afba9b9ccdc7fe12e7d0",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/media/8fcf71678f67d0c5-s.14cf5ea9.woff2",
+    "file": "_next/static/media/8fcf71678f67d0c5-s.14cf5ea9.woff2",
+    "bytes": 10572,
+    "sha256": "2071148c26bd0430cad316373c26db399e0cf8f6275b9e1a2c1b831f05ee7dc3",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/grid.svg",
+    "file": "grid.svg",
+    "bytes": 354,
+    "sha256": "b546e2835eee36e5bee70c5d6badf8170de83749449d0756c2863596d01fcad8",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/d0d496849a61c0a3.js",
+    "file": "_next/static/chunks/d0d496849a61c0a3.js",
+    "bytes": 1290,
+    "sha256": "731eb529b01c083dd324b7947c3f4508e1556f93c9ded229e92d4253f4524b64",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/7cebbb4620985077.js",
+    "file": "_next/static/chunks/7cebbb4620985077.js",
+    "bytes": 193459,
+    "sha256": "d8ce95e9ff5d551c926909cdc60c963c26e05de9375c949dd0140583ddc6b341",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/programs",
+    "file": "programs/index.html",
+    "bytes": 63976,
+    "sha256": "87c5f273cbc031ee3dfca41ed33352bbe0d079c9297b0edee21f46bc246bd5de",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/246aa0d5e9cbf431.js",
+    "file": "_next/static/chunks/246aa0d5e9cbf431.js",
+    "bytes": 30013,
+    "sha256": "88f8118df842c901b793d1e9cab33afe2496b0c2f5a39a7286e317c45e8b9beb",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/84104475afce0a79.js",
+    "file": "_next/static/chunks/84104475afce0a79.js",
+    "bytes": 26559,
+    "sha256": "e155108c79026b54f50fd8ff7268f065164e964f6bebbcad5fa56996c0ab20e7",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/admin/login",
+    "file": "admin/login/index.html",
+    "bytes": 17041,
+    "sha256": "4aa3f6714cdcc88a48c3260a4b2a5459061904ab76c2c6009b4144b07e7b931e",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/schedule",
+    "file": "schedule/index.html",
+    "bytes": 29207,
+    "sha256": "e1838f2c4f43a0cc28dbcd47da8a7df354d2cb822fc051cf2307e5cbaefcb08d",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/lookup",
+    "file": "lookup/index.html",
+    "bytes": 12502,
+    "sha256": "cf054a12c61e8cd179ec91ffef4fd1617ef468252e72242dd632b85c09378c96",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/saturday-stem-sessions",
+    "file": "book/saturday-stem-sessions/index.html",
+    "bytes": 16777,
+    "sha256": "f985a4d07f1f8ae0d01d557bacc754b01b745a93db00854cbc4381c02ff6ec9f",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/stem-park-visit",
+    "file": "book/stem-park-visit/index.html",
+    "bytes": 16756,
+    "sha256": "13058da54be92c20c73080c6ca5be0f19273ae95bb2400d74d497c47ff931d2e",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/5d81afc83535b467.js",
+    "file": "_next/static/chunks/5d81afc83535b467.js",
+    "bytes": 13607,
+    "sha256": "d36a6015061925eb49e6937ac35a497d4289214bcae8c03cb3485def058ed013",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/920622209bbe657a.js",
+    "file": "_next/static/chunks/920622209bbe657a.js",
+    "bytes": 49682,
+    "sha256": "03be5db696e8bc23599a212e79fde3d275141404426d286a724e1ec7acb4e3ff",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/9fa01a462cc16fed.js",
+    "file": "_next/static/chunks/9fa01a462cc16fed.js",
+    "bytes": 22335,
+    "sha256": "200c19df3d7b62579e1d3df39c652595ad835616158b6d83a68962c7df3e3b8c",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/c670e6c223606f63.js",
+    "file": "_next/static/chunks/c670e6c223606f63.js",
+    "bytes": 31566,
+    "sha256": "00664f0a8c7f31f238b5fd941f40d95fff12c4bf2bb270f6829d655706920e93",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/1b18900c522a781b.js",
+    "file": "_next/static/chunks/1b18900c522a781b.js",
+    "bytes": 19529,
+    "sha256": "0d99e7aaf4fc62084e219ce8311e2ecb77256a410226b979d83d619ff4a9bebe",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/274167837b2ef3d4.js",
+    "file": "_next/static/chunks/274167837b2ef3d4.js",
+    "bytes": 22335,
+    "sha256": "4ff29f78b41160b2c67d80ee2a8d864446380794a7cbca87111883436fbdb129",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/5c58288878d44aea.js",
+    "file": "_next/static/chunks/5c58288878d44aea.js",
+    "bytes": 41589,
+    "sha256": "cfd1a665cce3b0ec67b2afe7cc0e3d043bf25be11f08db7e4889c52527147e8a",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/dffa377fd7c1f377.js",
+    "file": "_next/static/chunks/dffa377fd7c1f377.js",
+    "bytes": 54812,
+    "sha256": "827be9c273113746d529167bbd9f9bc53f6a811769762e3cf0ea3859f7c0b8e7",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/_next/static/chunks/a8d1edad049700c9.js",
+    "file": "_next/static/chunks/a8d1edad049700c9.js",
+    "bytes": 30625,
+    "sha256": "5c82173ea4df909e6f60c5531f67b25e49970c5ef4ae002e78a5de020793cc56",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/birthday-visit",
+    "file": "book/birthday-visit/index.html",
+    "bytes": 16753,
+    "sha256": "71c6e7064f463bc3a637988aadda57680c3571deb150a4c2b50f05f45a0d149f",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/individual-visit",
+    "file": "book/individual-visit/index.html",
+    "bytes": 16759,
+    "sha256": "24ddb721ff14ed36250fc65ea769992558707342fb13ca1978c7d9a201abef89",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/school-visit",
+    "file": "book/school-visit/index.html",
+    "bytes": 16747,
+    "sha256": "96423cfa5a5a62ba1601bee47746f1a11d26ea4e02b8d282cd7a1a2febc231f2",
+    "httpStatus": 200
+  },
+  {
+    "url": "https://booking.projektinspire.co.tz/book/group-visit",
+    "file": "book/group-visit/index.html",
+    "bytes": 16744,
+    "sha256": "c6bdff5b92f9d7fbc9db8895dcc382b6446c5c633d40056f23ac11c0a6875c95",
+    "httpStatus": 200
+  }
+]

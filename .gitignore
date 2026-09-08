@@ -1,0 +1,15 @@
+.DS_Store
+._*
+.env
+.env.*
+!.env.example
+node_modules/
+*.log
+*.sql
+*.sql.gz
+*.pem
+*.key
+
+# Keep the original browser bundles local; they may include public service configuration.
+recovered-site/
+browser-captures/
