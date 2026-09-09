@@ -17,31 +17,23 @@ export function dateError(programme, date, now = new Date()) {
   if (!validDate(date)) return 'Choose a valid date.';
   if (date < today(now)) return 'Choose today or a future date.';
   if (date > addDays(today(now), 90)) return 'Choose a date within the next 90 days.';
-  const day = new Date(`${date}T12:00:00Z`).getUTCDay();
-  if (programme.schedule === 'saturday' && day !== 6) return 'Choose a Saturday.';
-  if (programme.schedule === 'weekday' && (day === 0 || day === 6)) return 'Choose a weekday, Monday–Friday.';
   return '';
 }
 export function timeSlots(programme, date, now = new Date()) {
   if (dateError(programme, date, now)) return [];
-  const minutes = programme.schedule === 'saturday' ? [600] : Array.from({ length: 13 }, (_, i) => 510 + i * 30);
-  return minutes.map(value => `${String(Math.floor(value / 60)).padStart(2, '0')}:${String(value % 60).padStart(2, '0')}`)
-    .filter(time => new Date(`${date}T${time}:00+03:00`) > now);
+  return (programme.slots || []).filter(s => s.remaining > 0 && new Date(s.start) > now && s.start.slice(0, 10) === date);
 }
 export function scheduledSession(programme, draft, now = new Date()) {
-  if (programme.mode === 'published') return publishedSessions(programme, now).find(session => session.id === draft.sessionId);
-  if (!programme.locations.includes(draft.location) || !timeSlots(programme, draft.date, now).includes(draft.time)) return undefined;
-  const start = new Date(`${draft.date}T${draft.time}:00+03:00`);
-  return { location: draft.location, start: start.toISOString(), end: new Date(start.getTime() + programme.duration * 60000).toISOString() };
+  if (programme.mode === 'published') return publishedSessions(programme, now).find(s => s.id === draft.sessionId);
+  return timeSlots(programme, draft.date, now).find(s => s.id === draft.slotId && String(s.locationId) === draft.locationId);
 }
 export function validateSchedule(programme, draft, now = new Date()) {
-  if (programme.mode === 'published') return scheduledSession(programme, draft, now) ? {} : { sessionId: 'Choose an upcoming session.' };
+  if (programme.mode === 'published') return scheduledSession(programme, draft, now) ? {} : { sessionId: 'Choose an available session.' };
   const errors = {};
-  if (!programme.locations.includes(draft.location)) errors.location = 'Choose a STEM Park.';
+  if (!programme.locations.some(l => String(l.id) === draft.locationId)) errors.locationId = 'Choose a location.';
   const error = dateError(programme, draft.date, now);
   if (error) errors.date = error;
-  else if (!timeSlots(programme, draft.date, now).length) errors.date = 'No session times remain. Choose another date.';
-  else if (!timeSlots(programme, draft.date, now).includes(draft.time)) errors.time = 'Choose an available start time.';
+  else if (!scheduledSession(programme, draft, now)) errors.slotId = 'Choose an available time.';
   return errors;
 }
 export function validateDetails(programme, draft, bookable = isBookable(programme), now = new Date()) {
@@ -71,14 +63,6 @@ export function validateDetails(programme, draft, bookable = isBookable(programm
   return errors;
 }
 
-// This is the only submission boundary. Replace with a server adapter later.
-// No contact details are persisted or transmitted by the demo.
-export function completeDemo(programme, draft, { now = new Date(), id = crypto.randomUUID(), bookable = isBookable(programme, now) } = {}) {
-  const errors = { ...validateDetails(programme, draft, bookable, now), ...(bookable ? validateSchedule(programme, draft, now) : {}) };
-  if (Object.keys(errors).length) return { errors };
-  return { status: 'demo', id, createdAt: now.toISOString(), programmeId: programme.id, title: programme.title,
-    session: bookable ? scheduledSession(programme, draft, now) : null };
-}
 export function formatDate(date) {
   return new Intl.DateTimeFormat('en-GB', { timeZone: TIME_ZONE, weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }).format(new Date(date.length === 10 ? `${date}T12:00:00+03:00` : date));
 }

@@ -1,0 +1,14 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^(?:admin(?:/login)?|login)/?$ https://projektinspire.co.tz/login [R=302,L]
+RewriteRule ^(?:lookup|schedule)(?:/index\.html)?/?$ /programs [R=302,L]
+RewriteRule ^book/(?:individual-visit|group-visit|school-visit)/?$ /book/stem-park-visit [R=302,L]
+RewriteRule ^book/birthday-visit/?$ /book/stem-themed-events [R=302,L]
+RewriteRule ^(?:_next|api)/ - [F,L]
+RewriteRule ^(?:programs/?|book/[^/]+/?|)$ programs/index.html [L]
+
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set Referrer-Policy "no-referrer"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; connect-src https://projektinspire.co.tz; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://projektinspire.co.tz; font-src 'self'; object-src 'none'; frame-src 'none'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'"
+</IfModule>

@@ -14,18 +14,18 @@ function fold(line) {
   return output;
 }
 function event(result) {
-  if (result.status !== 'demo' || !result.session || !result.id || !result.createdAt) throw new Error('A completed scheduled demo booking is required.');
+  if (result.status !== 'confirmed' || !result.session || !result.id || !result.createdAt) throw new Error('A confirmed scheduled booking is required.');
   if (!Number.isFinite(new Date(result.session.start).getTime()) || new Date(result.session.end) <= new Date(result.session.start)) throw new Error('Invalid event times.');
-  return { title: `DEMO — ${result.title}`, location: `Projekt Inspire STEM Park, ${result.session.location}`,
-    description: 'Demo booking only. No place has been reserved. Times are in East Africa Time (UTC+3).',
+  return { title: result.title, location: result.session.location,
+    description: `Confirmed booking. Reference: ${result.id}. Times are in East Africa Time (UTC+3). This calendar copy will not update automatically if your arrangements change.`,
     start: stamp(result.session.start), end: stamp(result.session.end) };
 }
 export function calendarFile(result) {
   const item = event(result);
-  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Projekt Inspire//Booking Demo//EN', 'CALSCALE:GREGORIAN',
+  const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Projekt Inspire//Booking//EN', 'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT', `UID:${escapeText(result.id)}@booking.projektinspire.co.tz`, `DTSTAMP:${stamp(result.createdAt)}`,
     `DTSTART:${item.start}`, `DTEND:${item.end}`, `SUMMARY:${escapeText(item.title)}`,
-    `LOCATION:${escapeText(item.location)}`, `DESCRIPTION:${escapeText(item.description)}`, 'STATUS:TENTATIVE'];
+    `LOCATION:${escapeText(item.location)}`, `DESCRIPTION:${escapeText(item.description)}`, 'STATUS:CONFIRMED'];
   for (const reminder of ['-P1D', '-PT1H']) lines.push('BEGIN:VALARM', 'ACTION:DISPLAY', `TRIGGER:${reminder}`, `DESCRIPTION:${escapeText(item.title)}`, 'END:VALARM');
   lines.push('END:VEVENT', 'END:VCALENDAR');
   return lines.map(fold).join('\r\n') + '\r\n';

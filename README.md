@@ -1,79 +1,73 @@
-# Projekt Inspire Booking
+# Projekt Inspire booking frontend
 
-A responsive programme catalogue and interactive booking **demo** for Projekt Inspire. This frontend is the starting point for a future Laravel/MySQL application on cPanel.
+The updated booking design now connects to the main website's Laravel API. It does not contain a separate backend, authentication system, MySQL connection or Supabase client.
 
 ## Run locally
 
-Requires Node.js 18 or newer. There are no packages to install.
+Start the main Laravel project on http://127.0.0.1:8000, then run:
 
 ```sh
 npm start
 ```
 
-Open http://127.0.0.1:8010. If that port is occupied:
+Open http://127.0.0.1:8010/programs. Restart any older preview process after updating these files; the previous demo server cannot serve the API adapter.
+
+Optional settings:
 
 ```sh
-BOOKING_PREVIEW_PORT=8011 npm start
+BOOKING_PREVIEW_PORT=8010 BOOKING_API_URL=http://127.0.0.1:8000/api/booking/v1 npm start
 ```
 
-Run the preview server rather than opening the HTML directly: it provides the programme routes and correct module headers.
+The local server injects that public API URL into the page. No password or private key belongs in this project. In production the page points to https://projektinspire.co.tz/api/booking/v1; do not deploy it until the backend is deployed and its CORS origin is configured.
 
-## What works
+## Where content comes from
 
-- Seven compact photo cards, using the supplied blue/orange/green palette and locally optimized company photos.
-- Daily Private Sessions and Saturday Sessions in Dar es Salaam; STEM Park Visits in Dar es Salaam or Tanga.
-- Private sessions and park visits Monday–Friday, 2½ hours, with half-hour starts from 08:30 through 14:30. Saturday sessions book one date, 10:00–12:30.
-- Date/time, contact and participant steps, validation, back navigation and review.
-- Enquiry previews for school clubs, custom events, Holiday Camps and the Annual STEM Youth Bootcamp. Camps and Bootcamp display “Dates coming soon”.
-- Scheduled demo completion with Google Calendar links and downloadable `.ics` events. Exports use Tanzania time and contain no contact/participant data. `.ics` requests one-day and one-hour reminders; calendar apps may use their own alert settings.
+The main admin controls programmes, images, dated sessions and recurring availability. Only active programmes with **Show on booking website** appear. Dated sessions additionally need their own booking switch enabled and must be published, within the booking period, and have capacity.
 
-All completions and exported events are labelled **DEMO**. No place is reserved and no enquiry, email or SMS is sent. Drafts live only in page memory and reset on refresh. There is no live availability, payment processing, customer account or booking backend. The original admin login remains an inactive reference.
+The initial catalogue import prepares the existing seven programmes for admin review without enabling booking. An empty catalogue after setup is intentional until an administrator approves programmes. News, announcements, homepage placements and unrelated admin content do not appear here.
 
-Calendar exports require the user to save the event in their calendar. They are standalone copies, not synchronized subscriptions. Google Calendar uses the user's notification settings. Phone/browser support for `.ics` import varies; Google Calendar and copying event details are alternative options. Device imports still need checking on real iPhone and Android hardware.
+- Regular appointments use server-provided dates/times, not browser-generated availability.
+- Camps and bootcamps show published sessions under one programme card.
+- School clubs and custom events use enquiry forms.
+- Programmes without dates offer enquiries only if the administrator permits it.
+- New programme IDs work without editing frontend routes.
+- Main-site deep links can use `/book/{bookingSlug}?session={sessionId}`.
+- `/book/{bookingSlug}?enquiry=1` opens an enquiry when permitted.
+- `/admin`, `/admin/login` and `/login` redirect to the main Laravel login. There is no second sign-in system.
 
-## Frontend structure
+## Submissions
 
-- `public/programs/index.html`: shared accessible page shell.
-- `public/assets/styles.css`: responsive catalogue, forms and completion styling.
-- `public/assets/programmes.js`: single catalogue for text, photos, venues and schedule/enquiry modes.
-- `public/assets/booking.js`: scheduling, date/time formatting, validation and the `completeDemo` submission boundary.
-- `public/assets/calendar.js`: RFC 5545 event generation and Google event links.
-- `public/assets/app.js`: programme cards, booking/enquiry steps and calendar interactions.
-- `public/assets/images/SOURCES.md`: provenance for the company images.
-- `preview.mjs`: local routes, static assets and content security policy. Only the new local modules are served as scripts; network connections and form POSTs are disabled.
+The server returns a saved reference and confirmation status. **Pending is not confirmed.** Approval is required by default; administrators may choose automatic confirmation per session/schedule. Pending bookings reserve participant spaces until staff makes a decision.
 
-The root redirects to `/programs`. Each catalogue ID has a `/book/{id}` route. Existing Saturday and park URLs are preserved. Legacy individual/group/school visits redirect to the park flow; birthdays redirect to STEM-Themed Events. `/lookup` and `/schedule` redirect to the catalogue, including their trailing-slash and `index.html` forms. Unknown programme routes return 404.
+Double clicks are blocked and retries with identical data reuse an idempotency key. No network failure produces fake success. Entered details remain in page memory after recoverable errors, but refreshing clears them; contact details are not saved in browser storage.
 
-The older public HTML files are retained but their routes are replaced by the preview server. `recovered-site/` and `browser-captures/` preserve the original references and remain excluded from Git. This is not the recovered original Next.js source.
+Calendar export is available only for confirmed scheduled bookings. It is a static copy, not a synchronized feed. Automatic emails, SMS and payments are not implemented; staff contact applicants using the details in the main admin.
 
-## Published camp and bootcamp dates
+## Files
 
-Keep `sessions: []` until real schedules are available. A programme in `published` mode offers booking only when it has a future session with all of:
+- `public/programs/index.html`: page shell and public production API URL.
+- `public/assets/app.js`: existing responsive catalogue and booking flows.
+- `public/assets/api.js`: API adapter and retry handling.
+- `public/assets/programmes.js`: in-memory server catalogue; no hardcoded public programme data.
+- `public/assets/booking.js`: form validation and server-slot selection.
+- `public/assets/calendar.js`: confirmed-booking calendar exports.
+- `public/assets/styles.css`, `public/assets/images/`: preserved visual assets.
+- `public/.htaccess`: future Apache routing/security configuration; not deployed.
+- `tests/fixtures/programmes.json`: test-only examples, never a fallback in the public application.
 
-```js
-{ id, location, start, end }
-```
+The authoritative API contract and backend setup are documented in the sibling main project at `../projektinspire-website/docs/booking-integration.md`. All database migrations belong there.
 
-`start` and `end` must be ISO date-times with explicit timezone offsets, and `end` must follow `start`. Each entry represents one independently booked occurrence or shift, not an invented recurring series. Incomplete and expired entries remain unavailable. Adding schedule data does not make the demo a real booking service.
-
-## Verification
+## Tests
 
 ```sh
 npm test
-```
-
-Node's built-in tests cover opening days/hours, expiry, timezone rollover, programme-specific validation, published schedules, event escaping and folding, reminder properties, and contact-data exclusion.
-
-The dependency-free browser checks require Node 22+ and an **isolated** Chrome instance exposing its DevTools endpoint. With the preview running at port 8011 and Chrome debugging at port 9337:
-
-```sh
 npm run test:browser
 ```
 
-Override `BOOKING_TEST_URL`, `BOOKING_CDP_URL` or `BOOKING_SCREENSHOT_DIR` as needed. The check creates and closes its own browser tab, exercises all seven flows, checks widths 320/390/820/1440, tests actual calendar downloads, and writes screenshots into `/private/tmp/inspire-booking-checks` by default. It never opens or saves to an external calendar account.
+Browser tests require an isolated Chrome CDP instance on http://127.0.0.1:9337 (override with `BOOKING_CDP_URL`). They create their own fake API and preview on unused local ports, without interrupting existing servers. They do not submit to the local MySQL database or live services. Screenshots are saved in `/private/tmp/inspire-booking-integration-checks`.
 
-## Backend handoff
+## Deployment boundary
 
-Replace `completeDemo` with a server submission adapter and fetch authoritative availability before offering confirmed bookings. Move final validation, capacity enforcement and reference generation to the backend. Gate real calendar events on a successful scheduled booking response; enquiries without confirmed times must not export events. Replace demo copy only when those backend operations are connected. Authentication, payments, communications, persistent storage and deployment are separate work.
+This change is local only. Do not push/deploy, change DNS/cPanel, remove Supabase data or change other websites without separate approval. Future hosting uses `public/` as the booking document root and the main Laravel API as the backend. Public API URLs are configuration, not credentials.
 
-No live website, database or hosting settings were changed by this frontend implementation.
+The recovered original bundles remain local reference material only; they are not an active application and should not be deployed.

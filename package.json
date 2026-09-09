@@ -2,7 +2,7 @@
   "name": "projektinspire-booking",
   "version": "0.1.0",
   "private": true,
-  "description": "Recovered public booking designs for the planned cPanel rebuild.",
+  "description": "Projekt Inspire booking frontend connected to the shared Laravel backend.",
   "type": "module",
   "scripts": {
     "start": "node preview.mjs",

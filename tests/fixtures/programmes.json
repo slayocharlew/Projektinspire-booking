@@ -1,0 +1,172 @@
+[
+  {
+    "id": "daily-private-sessions",
+    "title": "Daily Private Sessions",
+    "category": "Made for you",
+    "tone": "blue",
+    "summary": "One-to-one STEM lessons, on your timetable.",
+    "facts": [
+      "Ages 4–6 & 7–14",
+      "2½ hours"
+    ],
+    "scheduleLabel": "Monday–Friday",
+    "image": "private",
+    "imageAlt": "A Projekt Inspire facilitator guiding a practical learning activity",
+    "action": "Book session",
+    "mode": "scheduled",
+    "schedule": "weekday",
+    "duration": 150,
+    "locations": [
+      "Dar es Salaam"
+    ],
+    "audience": "children",
+    "singleLearner": true,
+    "details": [
+      "Choose your own topics and learn one-to-one with a facilitator.",
+      "Sessions include a 30-minute break. Working hours are 8:30 a.m.–5:00 p.m."
+    ]
+  },
+  {
+    "id": "saturday-stem-sessions",
+    "title": "Saturday Sessions",
+    "category": "Learn together",
+    "tone": "orange",
+    "summary": "Explore, build, and discover together every Saturday.",
+    "facts": [
+      "Ages 4–6 & 7–14",
+      "2½ hours"
+    ],
+    "scheduleLabel": "Saturdays · 10:00–12:30",
+    "image": "saturday",
+    "imageAlt": "Children building a model together during a practical STEM activity",
+    "action": "Book session",
+    "mode": "scheduled",
+    "schedule": "saturday",
+    "duration": 150,
+    "locations": [
+      "Dar es Salaam"
+    ],
+    "audience": "children",
+    "details": [
+      "Book one Saturday workshop at a time, from 10:00 a.m.–12:30 p.m.",
+      "A 30-minute break is included. Institutional partnerships are available on request."
+    ]
+  },
+  {
+    "id": "holiday-camps",
+    "title": "Holiday Camps",
+    "category": "Make holidays count",
+    "tone": "green",
+    "summary": "Hands-on holiday adventures, morning or afternoon.",
+    "facts": [
+      "Ages 4–6 & 7–14",
+      "2½ hours / shift"
+    ],
+    "scheduleLabel": "Dates coming soon",
+    "image": "camps",
+    "imageAlt": "Students collaborating on a hands-on engineering project",
+    "action": "Enquire",
+    "mode": "published",
+    "sessions": [],
+    "audience": "children",
+    "details": [
+      "Holiday, mid-term and end-of-year camps follow NECTA and Cambridge school calendars.",
+      "Camps run Monday–Friday for up to four weeks, depending on the holiday.",
+      "Morning and afternoon shifts are booked independently. Each lasts 2½ hours, including a 30-minute break.",
+      "Institutional partnerships are available on request."
+    ]
+  },
+  {
+    "id": "on-site-stem-clubs",
+    "title": "On-Site STEM Clubs",
+    "category": "At your school",
+    "tone": "blue",
+    "summary": "Weekly hands-on STEM learning at your school.",
+    "facts": [
+      "Primary & secondary",
+      "1 hour"
+    ],
+    "scheduleLabel": "Weekly · School hours",
+    "image": "clubs",
+    "imageAlt": "Students working together on a laptop during a school STEM session",
+    "action": "Enquire",
+    "mode": "enquiry",
+    "enquiryType": "school",
+    "details": [
+      "Weekly club meetings take place at your school during school hours, under a partnership agreement.",
+      "One-hour sessions are available for lower primary, upper primary and secondary students."
+    ]
+  },
+  {
+    "id": "stem-park-visit",
+    "title": "STEM Park Visits",
+    "category": "A little discovery",
+    "tone": "green",
+    "summary": "Explore hands-on STEM in Dar es Salaam or Tanga.",
+    "facts": [
+      "All ages",
+      "2½ hours"
+    ],
+    "scheduleLabel": "Monday–Friday",
+    "image": "park",
+    "imageAlt": "Projekt Inspire educators demonstrating a practical science experiment",
+    "action": "Book visit",
+    "mode": "scheduled",
+    "schedule": "weekday",
+    "duration": 150,
+    "locations": [
+      "Dar es Salaam",
+      "Tanga"
+    ],
+    "audience": "all",
+    "details": [
+      "Hands-on activities at our Dar es Salaam and Tanga STEM Parks welcome children, families, groups and adults.",
+      "Visits include a 30-minute break and fit within working hours, 8:30 a.m.–5:00 p.m."
+    ]
+  },
+  {
+    "id": "stem-themed-events",
+    "title": "STEM-Themed Events",
+    "category": "Celebrate differently",
+    "tone": "orange",
+    "summary": "Bring STEM fun to birthdays, school fairs, and team days.",
+    "facts": [
+      "All ages",
+      "3 hours"
+    ],
+    "scheduleLabel": "Your occasion. Your venue.",
+    "image": "events",
+    "imageAlt": "A child enjoying a hands-on experiment at a STEM birthday experience",
+    "action": "Enquire",
+    "mode": "enquiry",
+    "enquiryType": "event",
+    "details": [
+      "Add interactive STEM activities to birthdays, family days, school fairs, competitions and team-building events.",
+      "A three-hour experience for all ages. We also partner with institutions to host events on their premises."
+    ]
+  },
+  {
+    "id": "annual-stem-youth-bootcamp",
+    "title": "Annual STEM Youth Bootcamp",
+    "category": "Ideas into action",
+    "tone": "blue",
+    "summary": "Build projects, develop skills, and learn from expert mentors.",
+    "facts": [
+      "O-Level to university",
+      "Annual"
+    ],
+    "scheduleLabel": "Dates coming soon",
+    "image": "bootcamp",
+    "imageAlt": "Young people taking part in a collaborative Projekt Inspire workshop",
+    "action": "Enquire",
+    "mode": "published",
+    "sessions": [],
+    "audience": "youth",
+    "details": [
+      "For O-Level, A-Level, college and university learners.",
+      "Explore innovation, technology, leadership and entrepreneurship through coding, robotics, engineering and digital tools.",
+      "Develop career readiness and problem-solving skills, with mentorship from industry experts, university lecturers and young innovators.",
+      "Build projects and pitch ideas at the final showcase. Certificates, awards and internship or mentorship opportunities are available for outstanding participants."
+    ]
+  }
+]
