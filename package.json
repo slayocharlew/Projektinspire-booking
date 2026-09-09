@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "start": "node preview.mjs",
-    "dev": "node preview.mjs"
+    "dev": "node preview.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "test:browser": "node scripts/check-browser.mjs"
   },
   "engines": {
     "node": ">=18"

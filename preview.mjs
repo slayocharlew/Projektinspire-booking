@@ -2,12 +2,14 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getProgramme } from './public/assets/programmes.js';
 
 const root = fileURLToPath(new URL('./public/', import.meta.url));
 const port = Number(process.env.BOOKING_PREVIEW_PORT || 8010);
 const types = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
   '.svg': 'image/svg+xml',
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
@@ -23,7 +25,7 @@ const server = createServer(async (request, response) => {
   response.setHeader('Cache-Control', 'no-store');
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('Referrer-Policy', 'no-referrer');
-  response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'none'; connect-src 'none'; form-action 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'; frame-ancestors 'none'");
+  response.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; connect-src 'none'; form-action 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; object-src 'none'; frame-src 'none'; base-uri 'none'; frame-ancestors 'none'");
   if (!['GET', 'HEAD'].includes(request.method)) {
     response.writeHead(405, { Allow: 'GET, HEAD' });
     response.end('Design preview only. Booking and sign-in are not connected.');
@@ -31,12 +33,22 @@ const server = createServer(async (request, response) => {
   }
   try {
     let path = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
-    if (path === '/') {
-      response.writeHead(302, { Location: '/programs' });
+    const route = path.replace(/\/index\.html$/, '').replace(/\/$/, '') || '/';
+    const redirects = { '/': '/programs', '/lookup': '/programs', '/schedule': '/programs',
+      '/book/individual-visit': '/book/stem-park-visit', '/book/group-visit': '/book/stem-park-visit',
+      '/book/school-visit': '/book/stem-park-visit', '/book/birthday-visit': '/book/stem-themed-events' };
+    if (Object.hasOwn(redirects, route)) {
+      response.writeHead(302, { Location: redirects[route] });
       response.end();
       return;
     }
-    if (!extname(path)) path = path.replace(/\/$/, '') + '/index.html';
+    const bookingMatch = route.match(/^\/book\/([^/]+)$/);
+    if (route === '/programs' || (bookingMatch && getProgramme(bookingMatch[1]))) path = '/programs/index.html';
+    else if (bookingMatch) { response.writeHead(404); response.end('Programme not found. Visit /programs.'); return; }
+    else if (!extname(path)) path = path.replace(/\/$/, '') + '/index.html';
+    if (extname(path) === '.js' && !['/assets/app.js', '/assets/programmes.js', '/assets/booking.js', '/assets/calendar.js'].includes(path)) {
+      response.writeHead(404); response.end('Script not found.'); return;
+    }
     const file = resolve(root, '.' + path);
     if (!file.startsWith(root.replace(/\/$/, '') + sep) || !types[extname(file)]) {
       response.writeHead(404);
@@ -61,5 +73,5 @@ server.on('error', error => {
   process.exitCode = 1;
 });
 server.listen(port, '127.0.0.1', () => {
-  process.stdout.write(`Booking design reference: http://127.0.0.1:${port}\nForms and database connections are disabled in this preview.\n`);
+  process.stdout.write(`Booking frontend: http://127.0.0.1:${port}\nInteractive demo only. No real bookings or enquiries are sent.\n`);
 });
