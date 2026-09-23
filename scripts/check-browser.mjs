@@ -20,7 +20,7 @@ await mkdir(output, { recursive: true });
 const date = addDays(today(), 2);
 const slot = { id: '1@' + date + 'T08:30', locationId: 1, location: 'Dar STEM Park', start: date + 'T08:30:00+03:00', end: date + 'T11:00:00+03:00', remaining: 10 };
 const source = JSON.parse(await readFile(new URL('../tests/fixtures/programmes.json', import.meta.url), 'utf8'));
-const catalogue = source.map(p => ({ ...p, imageUrl: null, allowEnquiry: true, locations: p.mode === 'scheduled' ? [{ id: 1, name: 'Dar STEM Park' }] : [], sessions: p.mode === 'published' ? [{ ...slot, id: '42', title: 'Morning camp' }] : [] }));
+const catalogue = source.map(p => ({ ...p, imageUrl: null, programmeUrl: null, allowEnquiry: true, locations: p.mode === 'scheduled' ? [{ id: 1, name: 'Dar STEM Park' }] : [], sessions: p.mode === 'published' ? [{ ...slot, id: '42', title: 'Morning camp' }] : [] }));
 let mode = 'pending', submissions = 0, attempts = 0;
 const keys = new Map();
 const api = createServer(async (req, res) => {
@@ -54,6 +54,7 @@ const api = createServer(async (req, res) => {
 });
 await new Promise((resolve, reject) => { api.once('error', reject); api.listen(0, '127.0.0.1', resolve); });
 apiOrigin = 'http://127.0.0.1:' + api.address().port;
+catalogue.forEach(p => { p.programmeUrl = apiOrigin + '/programmes/main-' + p.id; });
 const preview = spawn(process.execPath, ['preview.mjs'], { cwd: root, env: { ...process.env, BOOKING_PREVIEW_PORT: String(previewPort), BOOKING_API_URL: apiOrigin + '/api/booking/v1' }, stdio: ['ignore', 'pipe', 'pipe'] });
 let previewLog = ''; preview.stdout.on('data', data => previewLog += data); preview.stderr.on('data', data => previewLog += data);
 let socket, target;
@@ -134,6 +135,34 @@ try {
     await until("!!document.querySelector('.completion')");
     assert.equal(attempts, before + 1, 'Duplicate click sent more than once');
     assert.equal(await evaluate("!!document.querySelector('#download-calendar')"), mode === 'confirmed');
+  }
+  mode = 'pending';
+  const camp = catalogue.find(p => p.mode === 'published');
+  await navigate('/book/' + camp.id + '?session=42');
+  assert.equal(await evaluate("document.querySelector('#sessionId').value"), '42');
+  assert.equal(await evaluate("document.querySelector('.programme-return').href"), camp.programmeUrl);
+  assert.equal(await evaluate("document.querySelector('.programme-return').target"), '');
+  assert.equal(await evaluate("document.querySelector('#sessionId option:checked').textContent.includes('Dar STEM Park')"), true);
+  await navigate('/book/' + camp.id + '?session=expired');
+  assert.equal(await evaluate("document.querySelector('#sessionId').value"), '');
+  assert.equal(await evaluate("document.body.innerText.includes('selected session is no longer available')"), true);
+  const savedSessions = camp.sessions;
+  camp.sessions = [];
+  await navigate('/book/' + camp.id + '?session=42');
+  assert.equal(await evaluate("!!document.querySelector('#booking-form')"), false, 'Do not silently turn an unavailable session into an enquiry');
+  assert.equal(await evaluate("[...document.querySelectorAll('a')].some(a => new URL(a.href).searchParams.get('enquiry') === '1')"), true);
+  await navigate('/book/' + camp.id + '?enquiry=1');
+  assert.equal(await evaluate("!!document.querySelector('#message')"), true);
+  camp.allowEnquiry = false;
+  await navigate('/book/' + camp.id);
+  assert.equal(await evaluate("document.body.innerText.includes('currently closed')"), true);
+  assert.equal(await evaluate("document.querySelector('.programme-return').href"), camp.programmeUrl);
+  camp.sessions = savedSessions; camp.allowEnquiry = true;
+  for (const width of [390, 320]) {
+    await command('Emulation.setDeviceMetricsOverride', { width, height: 900, deviceScaleFactor: 1, mobile: true });
+    await navigate('/book/' + catalogue[0].id + '?enquiry=1');
+    assert.equal(await evaluate('document.documentElement.scrollWidth <= innerWidth'), true, 'Return navigation must fit on phones');
+    assert.equal(await evaluate("document.querySelector('.programme-return').getBoundingClientRect().height >= 44"), true);
   }
   mode = 'failure'; await ready(catalogue[0]); await submit();
   await until("!document.querySelector('#submission-error').hidden");

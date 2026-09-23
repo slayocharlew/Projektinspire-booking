@@ -2,6 +2,7 @@
 // The local preview server replaces the HTML meta value using BOOKING_API_URL.
 const configured = typeof document === 'undefined' ? '' : document.querySelector('meta[name="booking-api-url"]')?.content;
 const base = (configured || 'http://127.0.0.1:8000/api/booking/v1').replace(/\/$/, '');
+export const websiteOrigin = new URL(base).origin;
 
 export class ApiError extends Error {
   constructor(message, status = 0, errors = {}) { super(message); this.status = status; this.errors = errors; }

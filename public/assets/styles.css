@@ -19,3 +19,13 @@
 /* Keep the compact phone cards readable and their main actions easy to tap. */
 @media(max-width:560px){.card-description,.card-wide .card-description{font-size:12px}.card-facts,.card-wide .card-facts{font-size:11px}.schedule-label{font-size:11px}.card-action{font-size:12px;min-height:44px}.card-footer,.card-wide .card-footer{gap:5px}.booking-layout:has(.completion) .booking-summary{display:none}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
+
+/* Keep a clear same-tab route back to the originating programme, including on phones. */
+.flow-navigation{display:flex;align-items:center;flex-wrap:wrap;gap:8px 22px;min-width:0}
+.flow-top{align-items:flex-start;gap:16px}
+.flow-navigation .back-link{min-height:44px;line-height:1.5;white-space:normal}
+.flow-navigation .programme-return{color:#5B2E93}
+.flow-top .preview-badge{flex-shrink:0;margin-top:10px}
+.unavailable-programme{padding:40px 0;max-width:760px}
+.unavailable-programme>p{margin:20px 0;line-height:1.6}
+@media(max-width:560px){.flow-navigation{gap:0 12px}.flow-top{flex-wrap:wrap}.flow-navigation .back-link{font-size:12px}}

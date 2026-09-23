@@ -17,3 +17,17 @@ export function publishedSessions(programme, now = new Date()) {
     new Date(s.start) > now && new Date(s.end) > new Date(s.start));
 }
 export const isBookable = (p, now = new Date()) => p.mode === 'scheduled' && p.locations.length > 0 || publishedSessions(p, now).length > 0;
+
+// Accept only canonical programme pages on this booking API's own website.
+export function programmeInformationUrl(programme, websiteOrigin) {
+  try {
+    const url = new URL(programme?.programmeUrl);
+    if (!['http:', 'https:'].includes(url.protocol) || url.origin !== new URL(websiteOrigin).origin ||
+        url.username || url.password || url.search || url.hash || !/^\/programmes\/[^/]+\/?$/.test(url.pathname)) return null;
+    return url.href;
+  } catch { return null; }
+}
+
+export function selectedSession(programme, id, now = new Date()) {
+  return programme?.mode === 'published' ? publishedSessions(programme, now).find(s => String(s.id) === String(id)) : undefined;
+}

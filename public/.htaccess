@@ -4,6 +4,8 @@ RewriteRule ^(?:admin(?:/login)?|login)/?$ https://projektinspire.co.tz/login [R
 RewriteRule ^(?:lookup|schedule)(?:/index\.html)?/?$ /programs [R=302,L]
 RewriteRule ^book/(?:individual-visit|group-visit|school-visit)/?$ /book/stem-park-visit [R=302,L]
 RewriteRule ^book/birthday-visit/?$ /book/stem-themed-events [R=302,L]
+# Keep the design's font available without exposing the retired application's bundles.
+RewriteRule ^_next/static/media/ce62453a442c7f35-s\.p\.124b2306\.woff2$ - [L]
 RewriteRule ^(?:_next|api)/ - [F,L]
 RewriteRule ^(?:programs/?|book/[^/]+/?|)$ programs/index.html [L]
 

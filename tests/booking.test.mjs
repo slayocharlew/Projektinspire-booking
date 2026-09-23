@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setProgrammes, getProgramme, programmes, isBookable, publishedSessions } from '../public/assets/programmes.js';
+import { setProgrammes, getProgramme, programmes, isBookable, publishedSessions, programmeInformationUrl, selectedSession } from '../public/assets/programmes.js';
 import { today, addDays, validDate, timeSlots, validateSchedule, validateDetails, scheduledSession, formatTime } from '../public/assets/booking.js';
 import { request, ApiError, submissionData, submissionKey } from '../public/assets/api.js';
 import { calendarFile, googleCalendarUrl } from '../public/assets/calendar.js';
@@ -107,4 +107,22 @@ test('calendar text cannot inject additional events and UTF-8 folding stays vali
   assert.ok(file.replace(/\r\n /g, '').includes('💡'.repeat(60)));
   const url = new URL(googleCalendarUrl(result));
   assert.equal(url.origin, 'https://calendar.google.com'); assert.equal(url.searchParams.get('stz'), 'Africa/Dar_es_Salaam');
+});
+
+test('return links use the main programme URL, not the booking alias or arbitrary hosts', () => {
+  const main = 'https://projektinspire.co.tz';
+  const programme = { ...p, id: 'on-site-stem-clubs', programmeUrl: main + '/programmes/school-stem-sessions' };
+  assert.equal(programmeInformationUrl(programme, main), programme.programmeUrl);
+  assert.equal(programmeInformationUrl({ programmeUrl: 'http://127.0.0.1:8000/programmes/local-lab' }, 'http://127.0.0.1:8000'), 'http://127.0.0.1:8000/programmes/local-lab');
+  for (const programmeUrl of [undefined, 'javascript:alert(1)', 'https://evil.example/programmes/lab', main + '/login', main + '/programmes/lab?redirect=evil', 'https://user:pass@projektinspire.co.tz/programmes/lab']) {
+    assert.equal(programmeInformationUrl({ programmeUrl }, main), null);
+  }
+});
+test('session deep links preserve only an available session of the chosen programme', () => {
+  const camp = { ...p, mode: 'published', sessions: [{ ...slot, id: '42' }, { ...slot, id: '43', remaining: 0 }] };
+  assert.equal(selectedSession(camp, '42', now).id, '42');
+  assert.equal(selectedSession(camp, '43', now), undefined);
+  assert.equal(selectedSession(camp, 'another-programme-session', now), undefined);
+  assert.equal(selectedSession(camp, '42', new Date('2026-09-11')), undefined);
+  assert.equal(selectedSession(p, '42', now), undefined);
 });
