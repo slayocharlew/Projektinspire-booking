@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { setProgrammes, getProgramme, programmes, isBookable, publishedSessions, programmeInformationUrl, selectedSession } from '../public/assets/programmes.js';
+import { setProgrammes, getProgramme, programmes, isBookable, publishedSessions, programmeInformationUrl, selectedSession, bookingPageUrl, bookingRequestRequested } from '../public/assets/programmes.js';
 import { today, addDays, validDate, timeSlots, validateSchedule, validateDetails, scheduledSession, formatTime } from '../public/assets/booking.js';
 import { request, ApiError, submissionData, submissionKey } from '../public/assets/api.js';
 import { calendarFile, googleCalendarUrl } from '../public/assets/calendar.js';
@@ -55,7 +55,7 @@ test('contact and participant validation remains programme-specific', () => {
   assert.ok(validateDetails(p, { ...draft, phone: 'invalid' }, true, now).phone);
   assert.ok(validateDetails(p, { ...draft, email: 'invalid' }, true, now).email);
 });
-test('school and event enquiries require the right information', () => {
+test('school and event bookings require the right information', () => {
   assert.ok(validateDetails({ ...p, enquiryType: 'school' }, draft, false, now).school);
   assert.deepEqual(validateDetails({ ...p, enquiryType: 'school' }, { ...draft, school: 'School', level: 'Lower primary', message: 'A weekly club' }, false, now), {});
   assert.ok(validateDetails({ ...p, enquiryType: 'event' }, { ...draft, message: 'Birthday' }, false, now).preferredDate);
@@ -125,4 +125,22 @@ test('session deep links preserve only an available session of the chosen progra
   assert.equal(selectedSession(camp, 'another-programme-session', now), undefined);
   assert.equal(selectedSession(camp, '42', new Date('2026-09-11')), undefined);
   assert.equal(selectedSession(p, '42', now), undefined);
+});
+
+test('booking links preserve programme and session selection, including older request links', () => {
+  assert.equal(bookingPageUrl('holiday-camps'), '/book/holiday-camps');
+  assert.equal(bookingPageUrl('holiday-camps', { session: '42' }), '/book/holiday-camps?session=42');
+  assert.equal(bookingPageUrl('holiday-camps', { request: true, session: '42' }), '/book/holiday-camps?booking=request');
+  assert.equal(bookingPageUrl('a/b?c'), '/book/a%2Fb%3Fc');
+  for (const search of ['?booking=request', '?enquiry=1', '?session=42&booking=request']) assert.equal(bookingRequestRequested(search), true);
+  for (const search of ['', '?session=42', '?enquiry=0', '?booking=confirmed']) assert.equal(bookingRequestRequested(search), false);
+});
+
+test('older backend messages use booking wording without changing submitted details', async () => {
+  let sent;
+  await assert.rejects(request('/enquiries', { method: 'POST', data: { message: 'Our enquiry notes' }, fetcher: async (url, options) => {
+    sent = JSON.parse(options.body);
+    return mock({ message: 'Enquiries are not available for this programme.', errors: { message: ['Enter an enquiry.'] } }, 422)();
+  } }), e => e.message === 'Bookings are not available for this programme.' && e.errors.message === 'Enter a booking.');
+  assert.equal(sent.message, 'Our enquiry notes');
 });

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('./public/', import.meta.url));
 const port = Number(process.env.BOOKING_PREVIEW_PORT || 8010);
 const apiUrl = new URL(process.env.BOOKING_API_URL || 'http://127.0.0.1:8000/api/booking/v1');
+const formsPreview = process.env.BOOKING_FORMS_PREVIEW === '1';
 if (!['http:', 'https:'].includes(apiUrl.protocol) || apiUrl.username || apiUrl.password) throw new Error('BOOKING_API_URL must be a public HTTP(S) URL without credentials.');
 const types = {
   '.html': 'text/html; charset=utf-8',
@@ -33,13 +34,21 @@ const server = createServer(async (request, response) => {
     return;
   }
   try {
-    let path = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+    const requestedUrl = new URL(request.url, 'http://localhost');
+    let path = decodeURIComponent(requestedUrl.pathname);
     const route = path.replace(/\/index\.html$/, '').replace(/\/$/, '') || '/';
+    if (path.startsWith('/__forms')) {
+      const previewFiles = { '/__forms': 'forms-preview.html', '/__forms/': 'forms-preview.html', '/__forms/app.js': 'forms-preview.js', '/__forms/fixtures.js': 'forms-fixtures.mjs', '/__forms/terms': 'preview-terms.html' };
+      if (!formsPreview || !Object.hasOwn(previewFiles, path)) { response.writeHead(404); response.end('Not found.'); return; }
+      const content = await readFile(new URL('./dev/' + previewFiles[path], import.meta.url));
+      response.writeHead(200, { 'Content-Type': path.endsWith('.js') ? types['.js'] : types['.html'] });
+      response.end(request.method === 'HEAD' ? undefined : content); return;
+    }
     const redirects = { '/': '/programs', '/lookup': '/programs', '/schedule': '/programs',
       '/book/individual-visit': '/book/stem-park-visit', '/book/group-visit': '/book/stem-park-visit',
       '/book/school-visit': '/book/stem-park-visit', '/book/birthday-visit': '/book/stem-themed-events' };
     if (Object.hasOwn(redirects, route)) {
-      response.writeHead(302, { Location: redirects[route] });
+      response.writeHead(302, { Location: redirects[route] + requestedUrl.search });
       response.end();
       return;
     }
@@ -49,7 +58,7 @@ const server = createServer(async (request, response) => {
     }
     if (route === '/programs' || bookingMatch) path = '/programs/index.html';
     else if (!extname(path)) path = path.replace(/\/$/, '') + '/index.html';
-    if (extname(path) === '.js' && !['/assets/app.js', '/assets/programmes.js', '/assets/booking.js', '/assets/calendar.js', '/assets/api.js'].includes(path)) {
+    if (extname(path) === '.js' && !['/assets/app.js', '/assets/programmes.js', '/assets/booking.js', '/assets/calendar.js', '/assets/api.js', '/assets/form-schema.js', '/assets/form-model.js', '/assets/form-api.js', '/assets/form-ui.js'].includes(path)) {
       response.writeHead(404); response.end('Script not found.'); return;
     }
     const file = resolve(root, '.' + path);

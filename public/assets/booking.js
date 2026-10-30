@@ -21,7 +21,7 @@ export function dateError(programme, date, now = new Date()) {
 }
 export function timeSlots(programme, date, now = new Date()) {
   if (dateError(programme, date, now)) return [];
-  return (programme.slots || []).filter(s => s.remaining > 0 && new Date(s.start) > now && s.start.slice(0, 10) === date);
+  return (programme.slots || []).filter(s => (s.capacityLimited === false || s.remaining === undefined || s.remaining > 0) && new Date(s.start) > now && s.start.slice(0, 10) === date);
 }
 export function scheduledSession(programme, draft, now = new Date()) {
   if (programme.mode === 'published') return publishedSessions(programme, now).find(s => s.id === draft.sessionId);
@@ -48,7 +48,7 @@ export function validateDetails(programme, draft, bookable = isBookable(programm
     if (allowed.length && (!draft.ages?.length || draft.ages.some(age => !allowed.includes(age)))) errors.ages = 'Select the participant age group or level.';
     if (programme.singleLearner && draft.ages?.length !== 1) errors.ages = 'Choose one age group for your learner.';
   } else {
-    if (!draft.message?.trim()) errors.message = 'Tell us a little about your request.';
+    if (!draft.message?.trim()) errors.message = 'Enter the details of your booking.';
     if (programme.enquiryType === 'school') {
       if (!draft.school?.trim()) errors.school = 'Enter your school name.';
       if (!['Lower primary', 'Upper primary', 'Secondary', 'Multiple levels'].includes(draft.level)) errors.level = 'Choose a student level.';

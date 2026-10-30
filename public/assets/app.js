@@ -1,10 +1,12 @@
-import { programmes, setProgrammes, getProgramme, HELP_URL, isBookable, publishedSessions, programmeInformationUrl, selectedSession } from './programmes.js?v=20260924b';
+import { programmes, setProgrammes, getProgramme, HELP_URL, isBookable, publishedSessions, programmeInformationUrl, selectedSession, bookingPageUrl, bookingRequestRequested } from './programmes.js?v=20261029a';
 import { today, addDays, dateError, timeSlots, validateSchedule, validateDetails, scheduledSession, formatDate, formatTime } from './booking.js';
-import { loadProgrammes, loadAvailability, submitRequest, submissionData, submissionKey, websiteOrigin } from './api.js?v=20260924b';
+import { loadProgrammes, loadAvailability, submitRequest, submissionData, submissionKey, websiteOrigin } from './api.js?v=20261029a';
 import { calendarFile, googleCalendarUrl } from './calendar.js';
+import { eligibleForms } from './form-model.js';
+import { FORMS } from './form-schema.js';
+import { mountRegistration } from './form-ui.js';
 
 const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const bookingPageUrl = (id, query = '') => `/book/${encodeURIComponent(id)}?${query ? query + '&' : ''}v=20260924b`;
 const icons = {
   arrow: '<path d="M5 12h14m-5-5 5 5-5 5"/>', back: '<path d="M19 12H5m5-5-5 5 5 5"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
@@ -33,17 +35,24 @@ function catalogue() {
   <section class="programme-grid" aria-label="Our programmes">${programmes.map((p, i) => {
     const bookable = isBookable(p);
     const link = bookingPageUrl(p.id);
-    return `<article class="programme-card tone-${p.tone}${programmes.length % 2 === 1 && i === programmes.length - 1 ? ' card-wide' : ''}"><a class="card-photo" href="${link}" tabindex="-1" aria-hidden="true">${photo(p, i > 2)}<span class="category">${escape(p.category)}</span></a><div class="card-content"><h2><a href="${link}">${escape(p.title)}</a></h2><p class="card-description">${escape(p.summary)}</p><div class="card-facts"><span>${icon('users')}${escape(p.facts[0])}</span><span>${icon('clock')}${escape(p.facts[1])}</span></div></div><div class="card-footer"><span class="schedule-label">${p.mode === 'published' && bookable ? 'Dates available' : escape(p.scheduleLabel)}</span><a class="card-action" href="${link}" aria-label="${bookable ? 'Book' : p.allowEnquiry ? 'Enquire' : 'View details'}: ${escape(p.title)}">${bookable ? 'Book' : p.allowEnquiry ? 'Enquire' : 'View details'}${icon('arrow')}</a></div></article>`;
+    return `<article class="programme-card tone-${p.tone}${programmes.length % 2 === 1 && i === programmes.length - 1 ? ' card-wide' : ''}"><a class="card-photo" href="${link}" tabindex="-1" aria-hidden="true">${photo(p, i > 2)}<span class="category">${escape(p.category)}</span></a><div class="card-content"><h2><a href="${link}">${escape(p.title)}</a></h2><p class="card-description">${escape(p.summary)}</p><div class="card-facts"><span>${icon('users')}${escape(p.facts[0])}</span><span>${icon('clock')}${escape(p.facts[1])}</span></div></div><div class="card-footer"><span class="schedule-label">${p.mode === 'published' && bookable ? 'Dates available' : escape(p.scheduleLabel)}</span><a class="card-action" href="${link}" aria-label="${bookable || p.allowEnquiry ? 'Book now' : 'View details'}: ${escape(p.title)}">${bookable || p.allowEnquiry ? 'Book now' : 'View details'}${icon('arrow')}</a></div></article>`;
   }).join('') || '<p>No programmes are open here yet. Please check back soon or contact our team.</p>'}</section><div class="catalogue-help"><span>Not sure where to start?</span><a href="${HELP_URL}" target="_blank" rel="noopener">Let’s find your programme ${icon('arrow')}</a></div>`;
 }
 
 let step = 0, result, blobUrl, sending = false, availabilityBusy = false, availabilityController, availabilityVersion = 0, submissionError = '';
 const keyFor = submissionKey();
 const requestedSessionId = new URLSearchParams(location.search).get('session') || '';
-const enquiryRequested = new URLSearchParams(location.search).get('enquiry') === '1';
-const unavailableSelection = !!(programme && requestedSessionId && !enquiryRequested && !selectedSession(programme, requestedSessionId));
-const bookable = programme && isBookable(programme) && !enquiryRequested;
-if (unavailableSelection) submissionError = 'The selected session is no longer available. Please choose another session or send an enquiry.';
+const requestRequested = bookingRequestRequested(location.search);
+// Keep previously shared links working, but show the current booking URL.
+if (new URLSearchParams(location.search).has('enquiry')) {
+  const url = new URL(location.href);
+  url.searchParams.delete('enquiry');
+  if (requestRequested) url.searchParams.set('booking', 'request');
+  history.replaceState(null, '', url);
+}
+const unavailableSelection = !!(programme && requestedSessionId && !requestRequested && !selectedSession(programme, requestedSessionId));
+const bookable = programme && isBookable(programme) && !requestRequested;
+if (unavailableSelection) submissionError = 'The selected session is no longer available. Please choose another session.';
 const draft = { locationId: programme?.locations?.length === 1 ? String(programme.locations[0].id) : '', date: '', slotId: '', consent: false, company: '', sessionId: unavailableSelection ? '' : requestedSessionId, name: '', phone: '', email: '', count: '1', ages: [], topic: '', message: '', school: '', level: '', eventType: '', preferredDate: '', venue: '', attendance: '' };
 let errors = {};
 function errorMarkup(name) { return `<p id="error-${name}" class="field-error" ${errors[name] ? '' : 'hidden'}>${escape(errors[name])}</p>`; }
@@ -62,14 +71,14 @@ function contactFields() {
 }
 function scheduleFields() {
   if (programme.mode === 'published') {
-    const options = select('sessionId', 'Choose a session', publishedSessions(programme).map(s => [s.id, `${s.title} · ${formatDate(s.start)} · ${formatTime(s.start)}–${formatTime(s.end)} · ${s.location} · ${s.remaining} spaces`]));
-    return options + (programme.allowEnquiry ? '<a class="back-link" href="' + bookingPageUrl(programme.id, 'enquiry=1') + '">Can’t find a session? Send an enquiry</a>' : '');
+    const options = select('sessionId', 'Choose a session', publishedSessions(programme).map(s => [s.id, `${s.title} · ${formatDate(s.start)} · ${formatTime(s.start)}–${formatTime(s.end)} · ${s.location}`]));
+    return options + (programme.allowEnquiry ? '<a class="back-link" href="' + bookingPageUrl(programme.id, { request: true }) + '">Need another date? Request a booking</a>' : '');
   }
-  return `${select('locationId', 'Choose your location', programme.locations.map(l => [String(l.id), l.name]))}<div class="field-grid">${input('date', 'Choose a date', { type: 'date', min: today(), max: addDays(today(), 90) })}<div id="time-field">${timeField()}</div></div><p class="field-hint">Only times made available by our team are offered. All times are East Africa Time (UTC+3).</p>${programme.allowEnquiry ? `<a class="back-link" href="${bookingPageUrl(programme.id, 'enquiry=1')}">Can’t find a time? Send an enquiry</a>` : ''}`;
+  return `${select('locationId', 'Choose your location', programme.locations.map(l => [String(l.id), l.name]))}<div class="field-grid">${input('date', 'Choose a date', { type: 'date', min: today(), max: addDays(today(), 90) })}<div id="time-field">${timeField()}</div></div><p class="field-hint">Only times made available by our team are offered. All times are East Africa Time (UTC+3).</p>${programme.allowEnquiry ? `<a class="back-link" href="${bookingPageUrl(programme.id, { request: true })}">Need another time? Request a booking</a>` : ''}`;
 }
 function timeField() {
   const slots = timeSlots(programme, draft.date);
-  return select('slotId', 'Available time', slots.map(s => [s.id, `${formatTime(s.start)}–${formatTime(s.end)} · ${s.remaining} spaces`]),
+  return select('slotId', 'Available time', slots.map(s => [s.id, `${formatTime(s.start)}–${formatTime(s.end)}`]),
     availabilityBusy ? 'Checking availability…' : draft.date && draft.locationId ? (slots.length ? 'Choose a time' : 'No times available — choose another date') : 'Choose a date and location first');
 }
 async function refreshAvailability() {
@@ -103,13 +112,13 @@ function participantFields() {
   const ages = programme.audience === 'children' ? ['4–6', '7–14'] : programme.audience === 'youth' ? ['O-Level', 'A-Level', 'College', 'University'] : [];
   return `<hr><h3>Who’s joining?</h3>${programme.singleLearner ? '<p class="field-hint">A private session is for one learner.</p>' : input('count', 'Number of participants', { type: 'number', min: 1, step: 1, inputmode: 'numeric' })}${ages.length ? `<fieldset class="age-field" aria-describedby="error-ages"><legend>${programme.audience === 'youth' ? 'Education level' : 'Age group'}${programme.singleLearner ? '' : ' <span class="optional">(select all that apply)</span>'}</legend><div class="choice-row">${ages.map(age => `<label class="choice"><input type="${programme.singleLearner ? 'radio' : 'checkbox'}" name="ages" value="${age}" ${draft.ages.includes(age) ? 'checked' : ''} aria-describedby="error-ages"><span>${programme.audience === 'children' ? `Ages ${age}` : age}</span></label>`).join('')}</div>${errorMarkup('ages')}</fieldset>` : ''}${programme.singleLearner ? input('topic', 'What would you like to explore?', { optional: true, placeholder: 'e.g. robotics, coding, science', maxlength: 300 }) : ''}`;
 }
-function enquiryFields() {
-  return `${contactFields()}<hr>${programme.enquiryType === 'school' ? `<div class="field-grid">${input('school', 'School name', { maxlength: 160 })}${select('level', 'Student level', ['Lower primary', 'Upper primary', 'Secondary', 'Multiple levels'])}</div>` : ''}${programme.enquiryType === 'event' ? `<div class="field-grid">${select('eventType', 'Event type', ['Birthday', 'Family day', 'School fair', 'Competition', 'Team-building', 'Other'])}${input('preferredDate', 'Preferred date', { type: 'date', min: today() })}${input('venue', 'Preferred venue or city', { maxlength: 200 })}${input('attendance', 'Estimated attendance', { type: 'number', min: 1, step: 1, inputmode: 'numeric' })}</div>` : ''}<div class="field"><label for="message">${programme.mode === 'published' ? 'Tell us about your interest' : 'How can we help?'}</label><textarea id="message" name="message" rows="4" required maxlength="2000" aria-describedby="error-message" ${errors.message ? 'aria-invalid="true"' : ''} placeholder="A few details are all we need.">${escape(draft.message)}</textarea>${errorMarkup('message')}</div>`;
+function bookingRequestFields() {
+  return `${contactFields()}<hr>${programme.enquiryType === 'school' ? `<div class="field-grid">${input('school', 'School name', { maxlength: 160 })}${select('level', 'Student level', ['Lower primary', 'Upper primary', 'Secondary', 'Multiple levels'])}</div>` : ''}${programme.enquiryType === 'event' ? `<div class="field-grid">${select('eventType', 'Event type', ['Birthday', 'Family day', 'School fair', 'Competition', 'Team-building', 'Other'])}${input('preferredDate', 'Preferred date', { type: 'date', min: today() })}${input('venue', 'Preferred venue or city', { maxlength: 200 })}${input('attendance', 'Estimated attendance', { type: 'number', min: 1, step: 1, inputmode: 'numeric' })}</div>` : ''}<div class="field"><label for="message">Booking details</label><textarea id="message" name="message" rows="4" required maxlength="2000" aria-describedby="error-message" ${errors.message ? 'aria-invalid="true"' : ''} placeholder="Preferred dates, group size and activities.">${escape(draft.message)}</textarea>${errorMarkup('message')}</div>`;
 }
 function review() {
   const session = bookable ? scheduledSession(programme, draft) : null;
-  const rows = [['Programme', programme.title], ...(session ? [['Where', session.location], ['When', formatDate(session.start)], ['Time', `${formatTime(session.start)}–${formatTime(session.end)} · EAT`]] : []), ['Name', draft.name], ['Phone', draft.phone], ...(draft.email ? [['Email', draft.email]] : []), ...(bookable ? [['Participants', draft.count], ...(draft.ages.length ? [['Age group / level', draft.ages.join(', ')]] : []), ...(draft.topic ? [['Topics', draft.topic]] : [])] : [...(draft.school ? [['School', draft.school], ['Student level', draft.level]] : []), ...(draft.eventType ? [['Event', draft.eventType], ['Preferred date', formatDate(draft.preferredDate)], ['Venue', draft.venue], ['Estimated attendance', draft.attendance]] : []), ['Your request', draft.message]])];
-  return `<dl class="review-list">${rows.map(([label, value]) => `<div><dt>${label}</dt><dd>${escape(value)}</dd></div>`).join('')}</dl><label class="choice"><input type="checkbox" name="consent" ${draft.consent ? 'checked' : ''} required><span>I agree that Projekt Inspire may use these details to manage and contact me about this request. I am an adult or the participant’s parent/guardian.</span></label>${errorMarkup('consent')}<p class="field-hint">Please do not include children’s full names or sensitive personal information. Email is optional; our team can contact you by phone.</p><div hidden aria-hidden="true"><label>Company<input name="company" tabindex="-1" autocomplete="off"></label></div>`;
+  const rows = [['Programme', programme.title], ...(session ? [['Where', session.location], ['When', formatDate(session.start)], ['Time', `${formatTime(session.start)}–${formatTime(session.end)} · EAT`]] : []), ['Name', draft.name], ['Phone', draft.phone], ...(draft.email ? [['Email', draft.email]] : []), ...(bookable ? [['Participants', draft.count], ...(draft.ages.length ? [['Age group / level', draft.ages.join(', ')]] : []), ...(draft.topic ? [['Topics', draft.topic]] : [])] : [...(draft.school ? [['School', draft.school], ['Student level', draft.level]] : []), ...(draft.eventType ? [['Event', draft.eventType], ['Preferred date', formatDate(draft.preferredDate)], ['Venue', draft.venue], ['Estimated attendance', draft.attendance]] : []), ['Booking details', draft.message]])];
+  return `<dl class="review-list">${rows.map(([label, value]) => `<div><dt>${label}</dt><dd>${escape(value)}</dd></div>`).join('')}</dl><label class="choice"><input type="checkbox" name="consent" ${draft.consent ? 'checked' : ''} required><span>I agree that Projekt Inspire may use these details to manage and contact me about this booking. I am an adult or the participant’s parent/guardian.</span></label>${errorMarkup('consent')}<p class="field-hint">Please do not include children’s full names or sensitive personal information. Email is optional; our team can contact you by phone.</p><div hidden aria-hidden="true"><label>Company<input name="company" tabindex="-1" autocomplete="off"></label></div>`;
 }
 function sidebar() {
   return `<aside class="booking-summary tone-${programme.tone}" aria-label="Programme details"><div class="summary-photo">${photo(programme, false)}<span class="category">${escape(programme.category)}</span></div><div class="summary-body"><h2>${escape(programme.title)}</h2><p>${escape(programme.summary)}</p><div class="summary-facts"><span>${icon('users')}${escape(programme.facts[0])}</span><span>${icon('clock')}${escape(programme.facts[1])}</span><span>${icon('calendar')}${programme.mode === 'published' && bookable ? 'Published sessions' : escape(programme.scheduleLabel)}</span></div><details><summary>Good to know</summary><ul>${programme.details.map(detail => `<li>${escape(detail)}</li>`).join('')}</ul></details></div></aside>`;
@@ -118,24 +127,58 @@ function completion() {
   const session = result.session;
   const confirmed = result.status === 'confirmed' && session;
   if (confirmed && !blobUrl) blobUrl = URL.createObjectURL(new Blob([calendarFile(result)], { type: 'text/calendar;charset=utf-8' }));
-  return `<section class="completion"><div class="complete-icon">${icon('check')}</div><p class="eyebrow">Request saved</p><h2 id="step-title" tabindex="-1">${confirmed ? 'Your booking is confirmed.' : result.status === 'pending' ? 'We’ve received your request.' : 'Request status: ' + escape(result.status)}</h2><p>${escape(result.message)}</p><p><strong>Your reference:</strong> ${escape(result.id)}</p>${session ? `<div class="event-ticket"><strong>${escape(result.title)}</strong><span>${icon('calendar')}${formatDate(session.start)}</span><span>${icon('clock')}${formatTime(session.start)}–${formatTime(session.end)} · EAT</span><span>${icon('pin')}${escape(session.location)}</span></div>` : ''}${confirmed ? `<details class="calendar-options"><summary class="button">${icon('calendar')}Add to calendar</summary><div class="calendar-menu"><a class="button button-secondary" id="google-calendar" href="${escape(googleCalendarUrl(result))}" target="_blank" rel="noopener noreferrer">Google Calendar</a><a class="button button-secondary" id="download-calendar" href="${blobUrl}" download="projekt-inspire-booking.ics">Apple / Other calendar (.ics)</a></div></details><p class="calendar-hint">This calendar copy does not update automatically if your arrangements change. Keep your booking reference.</p>` : '<p class="field-hint">Please wait for our team to confirm before making travel arrangements.</p>'}<a class="back-link completion-back" href="/programs?v=20260924b">${icon('back')}Back to programmes</a></section>`;
+  return `<section class="completion"><div class="complete-icon">${icon('check')}</div><p class="eyebrow">Booking saved</p><h2 id="step-title" tabindex="-1">${confirmed ? 'Your booking is confirmed.' : result.status === 'pending' ? 'We’ve received your booking.' : 'Booking status: ' + escape(result.status)}</h2><p>${escape(result.message)}</p><p><strong>Your reference:</strong> ${escape(result.id)}</p>${session ? `<div class="event-ticket"><strong>${escape(result.title)}</strong><span>${icon('calendar')}${formatDate(session.start)}</span><span>${icon('clock')}${formatTime(session.start)}–${formatTime(session.end)} · EAT</span><span>${icon('pin')}${escape(session.location)}</span></div>` : ''}${confirmed ? `<details class="calendar-options"><summary class="button">${icon('calendar')}Add to calendar</summary><div class="calendar-menu"><a class="button button-secondary" id="google-calendar" href="${escape(googleCalendarUrl(result))}" target="_blank" rel="noopener noreferrer">Google Calendar</a><a class="button button-secondary" id="download-calendar" href="${blobUrl}" download="projekt-inspire-booking.ics">Apple / Other calendar (.ics)</a></div></details><p class="calendar-hint">This calendar copy does not update automatically if your arrangements change. Keep your booking reference.</p>` : '<p class="field-hint">Please wait for our team to confirm before making travel arrangements.</p>'}<a class="back-link completion-back" href="/programs">${icon('back')}Back to programmes</a></section>`;
 }
 function informationLink() {
   const url = programmeInformationUrl(programme, websiteOrigin);
   return url ? '<a class="back-link programme-return" href="' + escape(url) + '">' + icon('back') + 'Back to programme information</a>' : '';
 }
+function openRegistration() {
+  const query = new URLSearchParams(location.search);
+  const requested = query.get('form');
+  if (requested === 'standard' && programme.legacyFormAllowed !== false) return false;
+  const available = eligibleForms(programme, websiteOrigin);
+  if (requested === 'standard' && programme.legacyFormAllowed === false) {
+    query.delete('form');
+    app.innerHTML = `<section class="unavailable-programme"><h1>This programme uses a detailed booking form.</h1><a class="button" href="${escape(location.pathname + '?' + query)}">Open booking form</a></section>`;
+    return true;
+  }
+  if (requested && !available.some(c => c.id === requested)) {
+    query.set('form', 'standard');
+    app.innerHTML = `<section class="unavailable-programme"><h1>This registration form is not available yet.</h1><a class="button" href="${escape(location.pathname + '?' + query)}">Use the current booking form</a></section>`;
+    return true;
+  }
+  if (!available.length && programme.registrationFormsManaged && programme.legacyFormAllowed === false) {
+    app.innerHTML = `<section class="unavailable-programme"><h1>Bookings are currently closed.</h1><p>Please check the programme updates for application dates.</p>${informationLink()}<a class="back-link" href="/programs">View available programmes</a></section>`;
+    return true;
+  }
+  if (!available.length) return false;
+  const needsChoice = available.length > 1 || available.some(c => ['school-visit', 'birthday'].includes(c.id));
+  if (!requested && needsChoice) {
+    const link = id => { const next = new URLSearchParams(query); next.set('form', id); return location.pathname + '?' + next; };
+    app.innerHTML = `<section class="unavailable-programme"><h1>${escape(programme.title)}</h1><p>Who are you booking for?</p><div class="registration-choices">${available.map(c => `<a class="button" href="${escape(link(c.id))}">${escape(FORMS[c.id].title)}</a>`).join('')}<a class="button button-secondary" href="${escape(link('standard'))}">${available.some(c => c.id === 'school-visit') ? 'Individual, family or other group' : 'Another type of event'}</a></div></section>`;
+    return true;
+  }
+  const config = available.find(c => c.id === requested) || available[0];
+  if (config.id === 'holiday-camp' && !publishedSessions(programme).length) {
+    app.innerHTML = `<section class="unavailable-programme"><h1>Camp bookings are currently closed.</h1><p>No published camp sessions are available.</p>${informationLink()}<a class="back-link" href="/programs">View available programmes</a></section>`;
+    return true;
+  }
+  mountRegistration({ root: app, programme, config, sessionId: requestedSessionId });
+  return true;
+}
 function unavailableProgramme() {
-  const link = bookingPageUrl(programme.id, 'enquiry=1');
+  const link = bookingPageUrl(programme.id, { request: true });
   app.innerHTML = '<section class="unavailable-programme"><h1>' + escape(programme.title) + '</h1><p role="status">' +
-    (unavailableSelection ? 'The selected session is no longer available.' : 'Bookings and enquiries are currently closed.') +
-    '</p><div class="flow-navigation">' + informationLink() + '<a class="back-link" href="/programs?v=20260924b">View available programmes</a>' +
-    (unavailableSelection && programme.allowEnquiry ? '<a class="button" href="' + link + '">Enquire about this programme</a>' : '') + '</div></section>';
+    (unavailableSelection ? 'The selected session is no longer available.' : 'Bookings are currently closed.') +
+    '</p><div class="flow-navigation">' + informationLink() + '<a class="back-link" href="/programs">View available programmes</a>' +
+    (unavailableSelection && programme.allowEnquiry ? '<a class="button" href="' + link + '">Request a booking</a>' : '') + '</div></section>';
 }
 function renderFlow(focus = false) {
   document.title = `${programme.title} | Projekt Inspire`;
-  const steps = bookable ? ['Date & time', 'Your details', 'Review'] : ['Your request', 'Review'];
+  const steps = bookable ? ['Date & time', 'Your details', 'Review'] : ['Booking details', 'Review'];
   const reviewing = step === steps.length - 1;
-  app.innerHTML = `<div class="flow-top"><nav class="flow-navigation" aria-label="Programme navigation">${informationLink()}<a class="back-link" href="/programs?v=20260924b">All programmes</a></nav><span class="preview-badge">Book with us</span></div><div class="flow-heading"><p class="eyebrow">${bookable ? 'Make room for discovery' : 'Start a conversation'}</p><h1>${escape(programme.title)}</h1></div><div class="booking-layout">${sidebar()}<div class="booking-panel">${result ? completion() : `<ol class="steps" aria-label="${bookable ? 'Booking' : 'Enquiry'} steps">${steps.map((label, i) => `<li class="${i === step ? 'current' : i < step ? 'complete' : ''}" ${i === step ? 'aria-current="step"' : ''}><span>${i < step ? icon('check') : i + 1}</span>${label}</li>`).join('')}</ol><form id="booking-form" novalidate><div class="step-heading"><h2 id="step-title" tabindex="-1">${reviewing ? 'Everything look right?' : bookable && step === 0 ? 'Pick your session' : bookable ? 'A little about you' : 'Tell us what you have in mind'}</h2><p>${reviewing ? 'Check your details before sending your request.' : bookable && step === 0 ? 'Choose a date and time that work for you.' : bookable ? 'We’ll use these details for your booking.' : programme.mode === 'published' ? 'Dates are coming soon. Share your interest with us.' : 'We’ll help shape the right experience for you.'}</p></div><p class="field-error" id="submission-error" role="alert" ${submissionError ? '' : 'hidden'}>${escape(submissionError)}</p>${reviewing ? review() : bookable ? step === 0 ? scheduleFields() : contactFields() + participantFields() : enquiryFields()}<div class="form-actions">${step > 0 ? `<button type="button" class="button button-secondary" data-back>${icon('back')}Back</button>` : '<span></span>'}<button class="button" type="submit">${reviewing ? bookable ? 'Submit booking' : 'Send enquiry' : 'Continue'}${icon('arrow')}</button></div>${reviewing ? '' : '<p class="preview-caption">Your details are used to manage this request.</p>'}</form>`}</div></div>`;
+  app.innerHTML = `<div class="flow-top"><nav class="flow-navigation" aria-label="Programme navigation">${informationLink()}<a class="back-link" href="/programs">All programmes</a></nav><span class="preview-badge">Book with us</span></div><div class="flow-heading"><p class="eyebrow">Book your experience</p><h1>${escape(programme.title)}</h1></div><div class="booking-layout">${sidebar()}<div class="booking-panel">${result ? completion() : `<ol class="steps" aria-label="Booking steps">${steps.map((label, i) => `<li class="${i === step ? 'current' : i < step ? 'complete' : ''}" ${i === step ? 'aria-current="step"' : ''}><span>${i < step ? icon('check') : i + 1}</span>${label}</li>`).join('')}</ol><form id="booking-form" novalidate><div class="step-heading"><h2 id="step-title" tabindex="-1">${reviewing ? 'Everything look right?' : bookable && step === 0 ? 'Pick your session' : bookable ? 'A little about you' : 'Your booking details'}</h2><p>${reviewing ? 'Check your details before submitting your booking.' : bookable && step === 0 ? 'Choose a date and time that work for you.' : bookable ? 'We’ll use these details for your booking.' : programme.mode === 'published' ? 'Submit your booking. Our team will confirm the available dates.' : 'Our team will confirm availability and arrangements with you.'}</p></div><p class="field-error" id="submission-error" role="alert" ${submissionError ? '' : 'hidden'}>${escape(submissionError)}</p>${reviewing ? review() : bookable ? step === 0 ? scheduleFields() : contactFields() + participantFields() : bookingRequestFields()}<div class="form-actions">${step > 0 ? `<button type="button" class="button button-secondary" data-back>${icon('back')}Back</button>` : '<span></span>'}<button class="button" type="submit">${reviewing ? 'Submit booking' : 'Continue'}${icon('arrow')}</button></div>${reviewing ? '' : '<p class="preview-caption">Your details are used to manage your booking.</p>'}</form>`}</div></div>`;
   const form = document.querySelector('#booking-form');
   if (form) {
     form.addEventListener('input', () => capture(form));
@@ -146,7 +189,7 @@ function renderFlow(focus = false) {
     form.addEventListener('submit', async event => {
       event.preventDefault(); if (sending || availabilityBusy) return; capture(form); submissionError = '';
       if (reviewing) {
-        if (!draft.consent) { errors.consent = 'Please agree before sending your request.'; showErrors(); return; }
+        if (!draft.consent) { errors.consent = 'Please agree before submitting your booking.'; showErrors(); return; }
         errors = { ...validateDetails(programme, draft, bookable), ...(bookable ? validateSchedule(programme, draft) : {}) };
         if (Object.keys(errors).length) {
           step = bookable && Object.keys(errors).some(key => ['date','slotId','locationId','sessionId'].includes(key)) ? 0 : bookable ? 1 : 0;
@@ -203,6 +246,7 @@ function focusError() {
 window.addEventListener('pagehide', () => { if (blobUrl) { URL.revokeObjectURL(blobUrl); blobUrl = null; } });
 window.addEventListener('pageshow', event => { if (event.persisted && result) renderFlow(); });
 if (catalogueError) app.innerHTML = `<section><h1>We couldn’t load the programmes.</h1><p role="alert">${escape(catalogueError)}</p><a class="button" href="${escape(location.pathname)}">Try again</a> <a href="${HELP_URL}">Contact our team</a></section>`;
-else if (slug && !programme) app.innerHTML = `<section><h1>This programme isn’t available for booking.</h1><a class="button" href="/programs?v=20260924b">View available programmes</a></section>`;
+else if (slug && !programme) app.innerHTML = `<section><h1>This programme isn’t available for booking.</h1><a class="button" href="/programs">View available programmes</a></section>`;
+else if (programme && openRegistration()) { /* Versioned forms own their validation and submission. */ }
 else if (programme && !bookable && (!programme.allowEnquiry || unavailableSelection)) unavailableProgramme();
 else if (programme) renderFlow(); else catalogue();
